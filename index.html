@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Mechaniker Admin</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <style>
+        td.details-control {
+            background: url('resources/img/details_open.png') no-repeat center center;
+            cursor: pointer;
+        }
+        
+        tr.shown td.details-control {
+            background: url('resources/img/details_close.png') no-repeat center center;
+        }
+
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+    <link rel="icon" href="resources/img/favicon.ico">
+    <link href="resources/css/bootstrap.min.css" rel="stylesheet">
+    <link href="resources/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="resources/css/theme.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script src="resources/js/bootstrap.min.js"></script>
+    <script src="resources/js/docs.min.js"></script>
+    <script src="resources/js/ie-emulation-modes-warning.js"></script>
+    <script>
+        function format(d) {
+            // `d` is the original data object for the row
+            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +
+                '<tr>' +
+                '<td>Full name:</td>' +
+                '<td>' + d.name + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<td>Last commit:</td>' +
+                '<td>' + d.sha + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<td>URL:</td>' +
+                '<td>' + d.url + '</td>' +
+                '</tr>' +
+                '</table>';
+        }
+
+
+        $(document).ready(function() {
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "https://api.github.com/repos/ecg-mechaniker/mechaniker/branches",
+                "method": "GET",
+                "headers": {
+                    "authorization": "Basic cG9zdG86NzNiYmQ1MTYxZDUyYWI3NTQ5MjExODYwZTYxMDM0MDllZGZmMDUzNA=="
+                }
+            }
+
+            $.ajax(settings).done(function(response) {
+                console.log(response);
+
+
+                var dataSet = [];
+                for (var i = 0; i < response.length; i++) {
+                    //alert(response.name);
+                    dataSet.push({
+                        "name": response[i].name,
+                        "description": "this is the description of " + response[i].name,
+                        "sha": response[i].commit.sha,
+                        "url": response[i].commit.url
+                    });
+                }
+
+                var table = $('#example').DataTable({
+                    "data": dataSet,
+                    "columns": [{
+                            "className": 'details-control',
+                            "orderable": false,
+                            "data": null,
+                            "defaultContent": ''
+                        },
+                        {
+                            "data": "name"
+                        },
+                        {
+                            "data": "description"
+                        }
+                    ],
+                    "order": [
+                        [0, 'asc']
+                    ]
+                });
+
+                // Add event listener for opening and closing details
+                $('#example tbody').on('click', 'td.details-control', function() {
+                    var tr = $(this).closest('tr');
+                    var row = table.row(tr);
+                    if (row.child.isShown()) {
+                        row.child.hide();
+                        tr.removeClass('shown');
+                    } else {
+                        row.child(format(row.data())).show();
+                        tr.addClass('shown');
+                    }
+                });
+            });
+
+        });
+
+    </script>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+                <a class="navbar-brand" href="#">Mechaniker</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Action</a></li>
+                            <li><a href="#">Another action</a></li>
+                            <li><a href="#">Something else here</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li class="dropdown-header">Nav header</li>
+                            <li><a href="#">Separated link</a></li>
+                            <li><a href="#">One more separated link</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main">
+
+        <div class="page-header">
+            <h1>Installed Applications</h1>
+        </div>
+        <table id="example" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <!--
+                    <th>Branches</th>
+                    <th>Office</th>
+                    <th>Salary</th>
+-->
+                </tr>
+            </thead>
+            <!--
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Office</th>
+                    <th>Salary</th>
+                </tr>
+            </tfoot>
+-->
+        </table>
+    </div>
+</body>
+
+</html>
