@@ -39,6 +39,76 @@
         .detail-table tr:hover {
             background-color: #ffff99;
         }
+        
+        .spinner {
+            position: absolute;
+            z-index: 99;
+            left: 50%;
+            top: 10%;
+            height: 60px;
+            width: 60px;
+            margin: 0px auto;
+            -webkit-animation: rotation .6s infinite linear;
+            -moz-animation: rotation .6s infinite linear;
+            -o-animation: rotation .6s infinite linear;
+            animation: rotation .6s infinite linear;
+            border-left: 6px solid red;
+            border-right: 6px solid blue;
+            border-bottom: 6px solid yellow;
+            border-top: 6px solid green;
+            border-radius: 100%;
+        }
+        
+        .spinnerText {
+            position: absolute;
+            z-index: 99;
+            left: 50%;
+            top: 10%;
+            height: 60px;
+            width: 60px;
+            border-radius: 100%;
+            border-left: 6px solid red;
+            border-right: 6px solid blue;
+            border-bottom: 6px solid yellow;
+            border-top: 6px solid green;
+            border-radius: 100%;
+        }
+        
+        @-webkit-keyframes rotation {
+            from {
+                -webkit-transform: rotate(0deg);
+            }
+            to {
+                -webkit-transform: rotate(359deg);
+            }
+        }
+        
+        @-moz-keyframes rotation {
+            from {
+                -moz-transform: rotate(0deg);
+            }
+            to {
+                -moz-transform: rotate(359deg);
+            }
+        }
+        
+        @-o-keyframes rotation {
+            from {
+                -o-transform: rotate(0deg);
+            }
+            to {
+                -o-transform: rotate(359deg);
+            }
+        }
+        
+        @keyframes rotation {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(359deg);
+            }
+        }
 
     </style>
 
@@ -52,26 +122,29 @@
     <script src="resources/js/ie-emulation-modes-warning.js"></script>
     <script>
         function doCall(applicationName, branchName, channelName) {
-            alert('selection: ' + applicationName + ' - ' + branchName + ' - ' + channelName);
+            //alert('selection: ' + applicationName + ' - ' + branchName + ' - ' + channelName);
+            $(spinner1).show();
+            $(spinner - text).show();
         }
-
         $(document).ready(function() {
 
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                //"url": "https://api.github.com/repos/ecg-mechaniker/mechaniker/branches",
-                "url": "localhost:8080/list",
+                "url": "https://api.github.com/repos/ecg-mechaniker/mechaniker/branches",
+                //"url": "localhost:8080/list",
                 "method": "GET",
-                //                "headers": {
-                //                    "authorization": "Basic ZGliZTg0OjQwMmY0Y2RlNTM5NjA4MGRmZGMyOGFmYWQ2YTE0ZGY5ZTU2MzVlNjg="
-                //                }
+                "headers": {
+                    "authorization": "Basic ZGliZTg0OjQwMmY0Y2RlNTM5NjA4MGRmZGMyOGFmYWQ2YTE0ZGY5ZTU2MzVlNjg="
+                }
             }
 
             $.ajax(settings).done(function(response) {
                 dataSet = response;
                 //Using mock
-                //dataSet = JSON.parse('[ { "application": "First Application", "description": "bla bla bla", "installed": { "revision": "master.20170628171025.2c84f9.dev", "branch": "master", "timestamp": "20170628171025", "version": "2c84f9", "channel": "dev" }, "available": [ { "branch": "f1" }, { "branch": "f2" }, { "branch": "f3" } ] }, { "application": "Second Application", "description": "bla bla bla bla", "installed": { "revision": "master.20170627131055.3d34a8.dev", "branch": "master", "timestamp": "20170627131055", "version": "3d34a8", "channel": "dev" }, "available": [ { "branch": "f2" }, { "branch": "f3" }, { "branch": "f4" } ] } ] ');
+                dataSet = JSON.parse('[ { "application": "First Application", "description": "bla bla bla", "installed": { "revision": "master.20170628171025.2c84f9.dev", "branch": "master", "timestamp": "20170628171025", "version": "2c84f9", "channel": "dev" }, "available": [ { "branch": "f1" }, { "branch": "f2" }, { "branch": "f3" } ] }, { "application": "Second Application", "description": "bla bla bla bla", "installed": { "revision": "master.20170627131055.3d34a8.dev", "branch": "master", "timestamp": "20170627131055", "version": "3d34a8", "channel": "dev" }, "available": [ { "branch": "f2" }, { "branch": "f3" }, { "branch": "f4" } ] } ] ');
+
+                dataSet = JSON.parse('[{"application":"/mechaniker","installed":{"revision":"20170628171025","branch":"master","timestamp":"20170628171025","version":"2c84f9","channel":"latest"},"available":[]},{"application":"/demo-app","installed":{"revision":"20170628193015","branch":"master","timestamp":"20170628193015","version":"205e9d","channel":"prod"},"available":[{"branch":"master"}]},{"application":"/demo-app-2","installed":{"revision":"20170628194457","branch":"master","timestamp":"20170628194457","version":"4ccb9b","channel":"prod"},"available":[{"branch":"master"},{"branch":"sans_serif"}]},{"application":"/tomas","installed":{"revision":"20170628193015","branch":"master","timestamp":"20170628193015","version":"205e9d","channel":"qa"},"available":[{"branch":"master"}]}]');
 
                 console.log(dataSet);
                 $(document).ready(function() {
@@ -98,7 +171,7 @@
                                     }
 
                                     if (type === 'display') {
-                                        data = '<div class="dropdown"> <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown"><span class="caret"></span></button> <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">' + picklistvalues + '</ul> </div>';
+                                        data = '<div class="dropdown"> <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown"> Select <span class="caret"></span></button> <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">' + picklistvalues + '</ul> </div>';
                                     }
 
                                     return data;
@@ -107,7 +180,8 @@
                             //                                       , // { // "targets": 3, // "data": null, // "defaultContent": "<button class='btn btn-success'>Save</button>" // }
                         ]
                     });
-
+                    $(spinner1).hide();
+                    $(spinner - text).hide();
                 });
 
 
@@ -170,6 +244,9 @@
 
         <div class="page-header">
             <h1>Applications</h1>
+            <div id="spinner1" class="spinner"></div>
+            <!--            <div id="spinnerText">Loading...</div>-->
+
         </div>
         <table id="example" class="display" cellspacing="0" width="100%">
             <thead>
