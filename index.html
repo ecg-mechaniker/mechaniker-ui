@@ -5,22 +5,43 @@
     <title>Mechaniker Admin</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+    <link rel="icon" href="resources/img/favicon.ico">
+    <link href="resources/css/bootstrap.min.css" rel="stylesheet">
+    <link href="resources/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="resources/css/theme.css" rel="stylesheet">
     <style>
         td.details-control {
             background: url('resources/img/details_open.png') no-repeat center center;
             cursor: pointer;
         }
         
+        td.nopadding {
+            padding: 0 !important;
+        }
+        
         tr.shown td.details-control {
             background: url('resources/img/details_close.png') no-repeat center center;
         }
+        
+        .detail-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        .detail-table td,
+        th {
+            border: 0px solid #dddddd;
+            text-align: left;
+            padding: 0px;
+        }
+        
+        .detail-table tr:hover {
+            background-color: #ffff99;
+        }
 
     </style>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
-    <link rel="icon" href="resources/img/favicon.ico">
-    <link href="resources/css/bootstrap.min.css" rel="stylesheet">
-    <link href="resources/css/bootstrap-theme.min.css" rel="stylesheet">
-    <link href="resources/css/theme.css" rel="stylesheet">
+
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,84 +51,79 @@
     <script src="resources/js/docs.min.js"></script>
     <script src="resources/js/ie-emulation-modes-warning.js"></script>
     <script>
-        function format(d) {
-            // `d` is the original data object for the row
-            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +
-                '<tr>' +
-                '<td>Full name:</td>' +
-                '<td>' + d.name + '</td>' +
-                '</tr>' +
-                '<tr>' +
-                '<td>Last commit:</td>' +
-                '<td>' + d.sha + '</td>' +
-                '</tr>' +
-                '<tr>' +
-                '<td>URL:</td>' +
-                '<td>' + d.url + '</td>' +
-                '</tr>' +
-                '</table>';
+        function doCall(applicationName, branchName, channelName) {
+            alert('selection: ' + applicationName + ' - ' + branchName + ' - ' + channelName);
         }
-
 
         $(document).ready(function() {
 
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://api.github.com/repos/ecg-mechaniker/mechaniker/branches",
+                //"url": "https://api.github.com/repos/ecg-mechaniker/mechaniker/branches",
+                "url": "localhost:8080/list",
                 "method": "GET",
-                "headers": {
-                    "authorization": "Basic cG9zdG86NzNiYmQ1MTYxZDUyYWI3NTQ5MjExODYwZTYxMDM0MDllZGZmMDUzNA=="
-                }
+                //                "headers": {
+                //                    "authorization": "Basic ZGliZTg0OjQwMmY0Y2RlNTM5NjA4MGRmZGMyOGFmYWQ2YTE0ZGY5ZTU2MzVlNjg="
+                //                }
             }
 
             $.ajax(settings).done(function(response) {
-                console.log(response);
+                dataSet = response;
+                //Using mock
+                //dataSet = JSON.parse('[ { "application": "First Application", "description": "bla bla bla", "installed": { "revision": "master.20170628171025.2c84f9.dev", "branch": "master", "timestamp": "20170628171025", "version": "2c84f9", "channel": "dev" }, "available": [ { "branch": "f1" }, { "branch": "f2" }, { "branch": "f3" } ] }, { "application": "Second Application", "description": "bla bla bla bla", "installed": { "revision": "master.20170627131055.3d34a8.dev", "branch": "master", "timestamp": "20170627131055", "version": "3d34a8", "channel": "dev" }, "available": [ { "branch": "f2" }, { "branch": "f3" }, { "branch": "f4" } ] } ] ');
 
+                console.log(dataSet);
+                $(document).ready(function() {
+                    var table = $('#example').DataTable({
+                        "data": dataSet,
+                        "columnDefs": [{
+                                "targets": 0,
+                                "data": "application"
+                            },
+                            {
+                                "targets": 1,
+                                "data": "installed.revision"
+                            },
+                            {
+                                "targets": 2,
+                                "data": null,
+                                "render": function(data, type, full, meta) {
+                                    var picklistvalues = '';
+                                    var channels = ["dev", "qa", "prod"];
+                                    for (var i = 0; i < data.available.length; i++) {
+                                        for (var j = 0; j < channels.length; j++) {
+                                            picklistvalues += '<li onclick="javascript:doCall(\'' + data.application + '\', \'' + data.available[i].branch + '\', \'' + channels[j] + '\');"><a tabindex="-1" href="#">' + data.available[i].branch + ' - ' + channels[j];
+                                        }
+                                    }
 
-                var dataSet = [];
-                for (var i = 0; i < response.length; i++) {
-                    //alert(response.name);
-                    dataSet.push({
-                        "name": response[i].name,
-                        "description": "this is the description of " + response[i].name,
-                        "sha": response[i].commit.sha,
-                        "url": response[i].commit.url
+                                    if (type === 'display') {
+                                        data = '<div class="dropdown"> <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown"><span class="caret"></span></button> <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">' + picklistvalues + '</ul> </div>';
+                                    }
+
+                                    return data;
+                                }
+                            }
+                            //                                       , // { // "targets": 3, // "data": null, // "defaultContent": "<button class='btn btn-success'>Save</button>" // }
+                        ]
                     });
-                }
 
-                var table = $('#example').DataTable({
-                    "data": dataSet,
-                    "columns": [{
-                            "className": 'details-control',
-                            "orderable": false,
-                            "data": null,
-                            "defaultContent": ''
-                        },
-                        {
-                            "data": "name"
-                        },
-                        {
-                            "data": "description"
-                        }
-                    ],
-                    "order": [
-                        [0, 'asc']
-                    ]
                 });
 
-                // Add event listener for opening and closing details
-                $('#example tbody').on('click', 'td.details-control', function() {
-                    var tr = $(this).closest('tr');
-                    var row = table.row(tr);
-                    if (row.child.isShown()) {
-                        row.child.hide();
-                        tr.removeClass('shown');
-                    } else {
-                        row.child(format(row.data())).show();
-                        tr.addClass('shown');
+
+                // does horrible HTML injections
+                function format(d) {
+                    // `d` is the original data object for the row
+
+                    //calculates picklist values
+                    picklistvalues = '';
+                    for (var i = 0; i < d.available.length; i++) {
+                        console.log(d.available[i].branch + ' - ' + d.available[i].channel);
+                        picklistvalues += '<li><a tabindex="-1" href="#">' + d.available[i].branch + ' - ' + d.available[i].channel + '</a></li>';
                     }
-                });
+
+                    return '<table class="detail-table"> <tbody> <tr> <td> <p>Installed version:</p> <table> <tbody> <tr> <td>Branch:</td> <td>' + d.installed.branch + '</td> </tr> <tr> <td>Version:</td> <td>' + d.installed.version + '</td> </tr> <tr> <td>Channel</td> <td>' + d.installed.channel + '</td> </tr> </tbody> </table> </td> </tr> </tbody> </table>';
+                }
             });
 
         });
@@ -153,32 +169,23 @@
     <div class="container theme-showcase" role="main">
 
         <div class="page-header">
-            <h1>Installed Applications</h1>
+            <h1>Applications</h1>
         </div>
         <table id="example" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th></th>
                     <th>Name</th>
-                    <th>Description</th>
+                    <th>Installed version</th>
+                    <th>Available versions</th>
                     <!--
-                    <th>Branches</th>
-                    <th>Office</th>
+                    <th>Action</th>
+                    <th>Description</th>
+                    <th>Available versions</th>
+                    <th>Action</th>
                     <th>Salary</th>
 -->
                 </tr>
             </thead>
-            <!--
-            <tfoot>
-                <tr>
-                    <th></th>
-                    <th>Name</th>
-                    <th>Position</th>
-                    <th>Office</th>
-                    <th>Salary</th>
-                </tr>
-            </tfoot>
--->
         </table>
     </div>
 </body>
